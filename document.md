@@ -1,5 +1,5 @@
 ---
-title: How to build `libffmpeg.so`\linebreak
+title: How to build `libffmpeg.so`\ \linebreak
        for use in Chrome(ium) and derivatives.
 author: Gustav (Gego of Xaren)
 date: 2020-06-07

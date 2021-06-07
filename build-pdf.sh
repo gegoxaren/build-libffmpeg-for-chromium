@@ -113,6 +113,8 @@ ___main___ () {
   
   cat ${_PDF_NAME}_pre.tex | ./tex_table_verts.py > ${_PDF_NAME}_post.tex
   
+  # We need to run this twice to make sure that LaTeX knows the size of things.
+  pdflatex ${_PDF_NAME}_post.tex
   pdflatex ${_PDF_NAME}_post.tex
   mv ${_PDF_NAME}_post.pdf ${_PDF_NAME}.pdf
   rm *.tex *.toc *.aux *.log
