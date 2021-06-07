@@ -105,11 +105,17 @@ ___main___ () {
     exit 127
   fi
   
-  pandoc -F pandoc-crossref\
-         --from markdown --to pdf\
+  pandoc -s -F pandoc-crossref\
+         --from markdown --to latex\
          --reference-links\
          ${_MD_NAME}.md\
-         -o ${_PDF_NAME}.pdf
+         -o ${_PDF_NAME}_pre.tex
+  
+  cat ${_PDF_NAME}_pre.tex | ./tex_table_verts.py > ${_PDF_NAME}_post.tex
+  
+  pdflatex ${_PDF_NAME}_post.tex
+  mv ${_PDF_NAME}_post.pdf ${_PDF_NAME}.pdf
+  rm *.tex *.toc *.aux *.log
   
   ___test_xdg___
   

@@ -6,7 +6,7 @@ date: 2020-06-07
 geometry: margin=2cm
 papersize: a4
 mainfont: DejaVu Serif
-fontsize: 12pt
+fontsize: 11pt
 ---
 
 # Abstract
@@ -21,16 +21,16 @@ This note provides information on how to compiling `ffmpeg` and it's libraries
 from source and how to produce `libffmpeg.so` on a GNU/Linux system, as the
 standard `make script` does not produce it.
 
-The note will conclude with a table that the improvements can make a difference
-in responsiveness.
+This note will show the differences between different versions of `libffmpeg.so`
+in terms of decode lag, and discuss the findings.
 
 # Introduction and Motivation
 The author of was playing games on Stadia[^stadia] and using a plug-in for
 Chrome(ium) measured that the decode time was higher than optimal when playing
 intensive games (in the order of 10+ ms) running on his older
 hardware[^hardware] without hardware acceleration, and the quite high CPU usage.
-The author wanted to see if using a specific microarchitecture (m-arch)
-would lower the decode lag.
+The author wanted to see if using a specific microarchitecture (m-arch) when
+compiling the library would lower the decode lag.
 
 [^stadia]: Google's cloud gaming service.
 
@@ -58,7 +58,7 @@ In this example the target CPU is the FX-8350, which uses the
 Piledriver microarchitecture [(Wikipedia, Piledriver)](#ref:WikPiledriver),
 which is AMD's 15th microarchitecture family. This would make it one of the
 `bdver` class microarchitectures
-[GCC Manual (2021)](#ref:GccManual).
+[(GCC Manual, 2021)](#ref:GccManual).
 
 Configure the build system for ffmpeg to use the correct architecture. This
 could be a bit of trail-and-error to figure out, when building: target the
@@ -120,8 +120,81 @@ gcc -shared -fPIC\
 ```
 
 # Testing and Results
-TODO
+The web browser used is UngoogledChromium in a flatpak sandbox, started using
+the following command:
+```bash
+flatpak run com.github.Eloston.UngoogledChromium
+```
 
+In `chrome://flags/` the following flags were set.
+
+
+| **flag**                   | **value** |
+|----------------------------|-----------|
+| #ignore-gpu-blocklist      | enabled   |
+| #enable-reader-mode        | enabled   |
+| #enable-gpu-rasterization  | enabled   |
+| #enable-vulkan             | enabled   |
+
+
+Replacing the `libffmpeg.so` was done as follows:
+```bash
+cd ~/.local/share/flatpak/app/\
+com.github.Eloston.UngoogledChromium/\
+current/active/files/chromium/
+
+mv libffmpeg.so old_libffmpeg.so_old
+
+# Change dirctory to where the new libffmpeg.so was created
+
+cp libffmpeg.so ~/.local/share/flatpak/app/\
+com.github.Eloston.UngoogledChromium/\
+current/active/files/chromium/
+```
+
+Measuring of decode time was done using the Stadia Enhanced[^StadiaEnhanced],
+that provides a way of monitoring -- among other thing -- how long it takes to
+decode a frame (the decode lag). The test consisted of playing _DOOM: Eternal -
+The Ancient Gods: Part 1_ in an almost canned test that consisted of playing
+the same for 25 minutes and manually looking at the information provided by
+the Stadia Enhanced plug-in. Generally, the decode time goes up the longer the
+play session is, but seems level off after 25 minutes.
+
+[^StadiaEnhanced]: [https://github.com/ChristopherKlay/StadiaEnhanced](https://github.com/ChristopherKlay/StadiaEnhanced)
+
+Between each session the computer idled for a bit before the next test was done.
+
+Bellow follows the results, each subsection starts with what flags were used to
+build the version of ffmpeg used in that test, the exception being the 'original'
+test, that will only provide decode times.
+
+All tests with configuration options shown have been compiled
+with `--enable-nonfree --enable-gpl --enable-version3`.
+
+## Original
+This version of `libffmpeg.so` was provided with UngoogledChromium.
+
+## Hardware tables and microarchitecture optimised
+**configuration options**
+
+```
+--enable-hardcoded-tables
+--extra-cflags='-mtune=bdver3 -O2'
+--extra-cxxflags='-mtune=bdver3 -O2'
+--extra-objcflags='-mtune=bdver3 -O2'
+--arch=amd64
+--cpu=bdver3
+```
+
+**Test Results**
+
+| **Test #** | **decode time (ms)** |
+|------------|----------------------|
+| 1          | 10.4                 |
+| 2          | 10.0                 |
+
+
+\pagebreak
 # Refrences
 [](){#ref:LeCuirot} _Le Cuirot, J,_ 2017, [FFmpeg-devel] build: Allow libffmpeg 
 to be built for Chromium-based browsers, URL: 
