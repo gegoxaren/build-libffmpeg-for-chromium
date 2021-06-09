@@ -119,6 +119,7 @@ gcc -shared -fPIC\
     -o libffmpeg.so
 ```
 
+\pagebreak
 # Testing and Results
 The web browser used is UngoogledChromium in a flatpak sandbox, started using
 the following command:
@@ -171,10 +172,22 @@ test, that will only provide decode times.
 All tests with configuration options shown have been compiled
 with `--enable-nonfree --enable-gpl --enable-version3`.
 
-## Original
+\pagebreak
+## Original (TODO)
+
 This version of `libffmpeg.so` was provided with UngoogledChromium.
 
+**Test Results**
+
+| **Test #** | **decode time (ms)** |
+|------------|----------------------|
+| 1          |                      |
+| 2          |                      |
+| 3          |                      |
+
+
 ## Hardware tables and microarchitecture optimised
+
 **configuration options**
 
 ```
@@ -192,6 +205,31 @@ This version of `libffmpeg.so` was provided with UngoogledChromium.
 |------------|----------------------|
 | 1          | 10.4                 |
 | 2          | 10.0                 |
+| 3          | 10.15                |
+
+## Microarchitecture optimised (TODO)
+
+**configuration optimisations**
+
+```
+--enable-hardcoded-tables
+--extra-cflags='-mtune=bdver3 -O2'
+--extra-cxxflags='-mtune=bdver3 -O2'
+--extra-objcflags='-mtune=bdver3 -O2'
+--arch=amd64
+--cpu=bdver3
+```
+
+**Test Results**
+
+| **Test #** | **decode time (ms)** |
+|------------|----------------------|
+| 1          |                      |
+| 2          |                      |
+| 3          |                      |
+
+\pagebreak
+# Discussion (TODO)
 
 
 \pagebreak
